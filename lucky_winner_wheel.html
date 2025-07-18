@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Winner Spinning Wheel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .wheel-container {
+            position: relative;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        .wheel {
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 8px solid #FFD700;
+            transition: transform 4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .wheel.spinning {
+            transform: rotate(var(--spin-angle, 1800deg));
+        }
+
+        .segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            top: 50%;
+            left: 50%;
+            transform-origin: 0 0;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }
+
+        .arrow {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #FFD700;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            z-index: 10;
+        }
+
+        .spin-button {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
+            border: none;
+            color: white;
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 30px 20px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .spin-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .spin-button:disabled {
+            background: #888;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .reset-button {
+            background: linear-gradient(45deg, #4ECDC4, #44A08D);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .reset-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .prize-info {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .prize-card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .prize-amount {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        .prize-remaining {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .winner-display {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .winner-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #FFD700;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .wheel {
+                width: 300px;
+                height: 300px;
+            }
+            
+            .segment {
+                font-size: 10px;
+            }
+            
+            .prize-info {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .prize-card {
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🎉 Lucky Winner Wheel 🎉</h1>
+        <p class="subtitle">Spin the wheel to discover your prize!</p>
+        
+        <div class="prize-info">
+            <div class="prize-card">
+                <div class="prize-amount">💰 1000 AED</div>
+                <div class="prize-remaining">Remaining: <span id="prize-1000">1</span></div>
+            </div>
+            <div class="prize-card">
+                <div class="prize-amount">💰 500 AED</div>
+                <div class="prize-remaining">Remaining: <span id="prize-500">10</span></div>
+            </div>
+            <div class="prize-card">
+                <div class="prize-amount">💰 300 AED</div>
+                <div class="prize-remaining">Remaining: <span id="prize-300">12</span></div>
+            </div>
+        </div>
+
+        <div class="wheel-container">
+            <div class="arrow"></div>
+            <div class="wheel" id="wheel"></div>
+        </div>
+
+        <div class="winner-display" id="winner-display">
+            <div class="winner-text">Click "SPIN" to start!</div>
+        </div>
+
+        <button class="spin-button" id="spin-btn" onclick="spinWheel()">🎯 SPIN THE WHEEL!</button>
+        <button class="reset-button" onclick="resetGame()">🔄 Reset Game</button>
+
+        <div class="celebration" id="celebration"></div>
+    </div>
+
+    <script>
+        // Game state
+        let employees = [];
+        let availablePrizes = {
+            1000: 1,
+            500: 10,
+            300: 12
+        };
+        let usedEmployees = new Set();
+        let isSpinning = false;
+        let currentRotation = 0;
+
+        // Initialize the game
+        function initializeGame() {
+            // Generate 23 employees
+            employees = [];
+            for (let i = 1; i <= 23; i++) {
+                employees.push(`Employee ${i}`);
+            }
+            
+            // Create wheel segments
+            createWheel();
+            
+            // Update prize display
+            updatePrizeDisplay();
+        }
+
+        function createWheel() {
+            const wheel = document.getElementById('wheel');
+            wheel.innerHTML = '';
+            
+            const segmentAngle = 360 / 23;
+            const colors = [
+                '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+                '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+                '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#F7DC6F',
+                '#BB8FCE', '#98D8C8', '#FFEAA7', '#DDA0DD', '#96CEB4',
+                '#45B7D1', '#4ECDC4', '#FF6B6B'
+            ];
+
+            for (let i = 0; i < 23; i++) {
+                const segment = document.createElement('div');
+                segment.className = 'segment';
+                segment.style.backgroundColor = colors[i];
+                segment.style.transform = `rotate(${i * segmentAngle}deg)`;
+                segment.textContent = employees[i];
+                wheel.appendChild(segment);
+            }
+        }
+
+        function assignPrize() {
+            // Determine prize based on availability
+            if (availablePrizes[1000] > 0) {
+                // 10% chance for 1000 AED when available
+                if (Math.random() < 0.1) {
+                    availablePrizes[1000]--;
+                    return 1000;
+                }
+            }
+            
+            if (availablePrizes[500] > 0) {
+                // 50% chance for 500 AED when available
+                if (Math.random() < 0.5) {
+                    availablePrizes[500]--;
+                    return 500;
+                }
+            }
+            
+            if (availablePrizes[300] > 0) {
+                availablePrizes[300]--;
+                return 300;
+            }
+            
+            // Fallback - give remaining prize
+            for (let prize of [1000, 500, 300]) {
+                if (availablePrizes[prize] > 0) {
+                    availablePrizes[prize]--;
+                    return prize;
+                }
+            }
+            
+            return 300; // Default fallback
+        }
+
+        function spinWheel() {
+            if (isSpinning || usedEmployees.size >= 23) return;
+            
+            isSpinning = true;
+            const spinBtn = document.getElementById('spin-btn');
+            const winnerDisplay = document.getElementById('winner-display');
+            
+            spinBtn.disabled = true;
+            winnerDisplay.innerHTML = '<div class="winner-text">🎰 Spinning...</div>';
+            
+            // Play spin sound (simulated)
+            playSpinSound();
+            
+            // Random spin amount (3-5 full rotations plus random angle)
+            const spins = 3 + Math.random() * 2;
+            const finalAngle = Math.random() * 360;
+            const totalRotation = (spins * 360) + finalAngle;
+            
+            currentRotation += totalRotation;
+            
+            const wheel = document.getElementById('wheel');
+            wheel.style.setProperty('--spin-angle', `${currentRotation}deg`);
+            wheel.classList.add('spinning');
+            
+            // Determine winner after spin
+            setTimeout(() => {
+                const segmentAngle = 360 / 23;
+                const normalizedAngle = (360 - (currentRotation % 360)) % 360;
+                const winnerIndex = Math.floor(normalizedAngle / segmentAngle) % 23;
+                const winner = employees[winnerIndex];
+                
+                if (!usedEmployees.has(winner)) {
+                    usedEmployees.add(winner);
+                    const prize = assignPrize();
+                    
+                    // Show winner
+                    winnerDisplay.innerHTML = `
+                        <div class="winner-text">
+                            🎉 ${winner} wins 💰 ${prize} AED! 🎉
+                        </div>
+                    `;
+                    
+                    // Add celebration effect
+                    celebrate();
+                    
+                    // Update prize display
+                    updatePrizeDisplay();
+                    
+                    // Play win sound
+                    playWinSound();
+                } else {
+                    // Re-spin if employee already won
+                    setTimeout(() => {
+                        spinWheel();
+                        return;
+                    }, 1000);
+                }
+                
+                wheel.classList.remove('spinning');
+                isSpinning = false;
+                
+                // Check if game is complete
+                if (usedEmployees.size >= 23) {
+                    spinBtn.textContent = '🎊 Game Complete!';
+                    spinBtn.disabled = true;
+                    setTimeout(() => {
+                        winnerDisplay.innerHTML = '<div class="winner-text">🎊 All employees have won prizes! 🎊</div>';
+                    }, 3000);
+                } else {
+                    spinBtn.disabled = false;
+                }
+                
+            }, 4000);
+        }
+
+        function updatePrizeDisplay() {
+            document.getElementById('prize-1000').textContent = availablePrizes[1000];
+            document.getElementById('prize-500').textContent = availablePrizes[500];
+            document.getElementById('prize-300').textContent = availablePrizes[300];
+        }
+
+        function celebrate() {
+            const celebration = document.getElementById('celebration');
+            
+            // Create confetti
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.backgroundColor = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'][Math.floor(Math.random() * 5)];
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                celebration.appendChild(confetti);
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    confetti.remove();
+                }, 3000);
+            }
+        }
+
+        function playSpinSound() {
+            // Create audio context for sound effects
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.5);
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        function playWinSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(523, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.2);
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        function resetGame() {
+            // Reset all game state
+            usedEmployees.clear();
+            availablePrizes = {
+                1000: 1,
+                500: 10,
+                300: 12
+            };
+            currentRotation = 0;
+            isSpinning = false;
+            
+            // Reset UI
+            const wheel = document.getElementById('wheel');
+            wheel.style.transform = 'rotate(0deg)';
+            wheel.classList.remove('spinning');
+            
+            const spinBtn = document.getElementById('spin-btn');
+            spinBtn.textContent = '🎯 SPIN THE WHEEL!';
+            spinBtn.disabled = false;
+            
+            const winnerDisplay = document.getElementById('winner-display');
+            winnerDisplay.innerHTML = '<div class="winner-text">Click "SPIN" to start!</div>';
+            
+            // Update displays
+            updatePrizeDisplay();
+            
+            // Clear any remaining confetti
+            document.getElementById('celebration').innerHTML = '';
+        }
+
+        // Initialize game on page load
+        window.onload = initializeGame;
+    </script>
+</body>
+</html>
