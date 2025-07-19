@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Winner Spinning Wheel</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="title">
+                <i class="fas fa-crown"></i>
+                Lucky Winner Spinning Wheel
+                <i class="fas fa-crown"></i>
+            </h1>
+            <p class="subtitle">23 Employees • 3 Prize Tiers • Fair & Fun!</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Panel - Remaining Prizes -->
+            <aside class="prizes-panel">
+                <h3 class="panel-title">
+                    <i class="fas fa-gift"></i>
+                    Remaining Prizes
+                </h3>
+                <div class="prize-counters">
+                    <div class="prize-item gold">
+                        <div class="prize-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="prize-info">
+                            <span class="prize-amount">💰 1000 AED</span>
+                            <span class="prize-count" id="prize-1000-count">1 left</span>
+                        </div>
+                    </div>
+                    <div class="prize-item silver">
+                        <div class="prize-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="prize-info">
+                            <span class="prize-amount">💰 500 AED</span>
+                            <span class="prize-count" id="prize-500-count">10 left</span>
+                        </div>
+                    </div>
+                    <div class="prize-item bronze">
+                        <div class="prize-icon">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <div class="prize-info">
+                            <span class="prize-amount">💰 300 AED</span>
+                            <span class="prize-count" id="prize-300-count">12 left</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="progress-section">
+                    <h4>Event Progress</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <span class="progress-text" id="progress-text">0 / 23 winners</span>
+                </div>
+            </aside>
+
+            <!-- Center - Spinning Wheel -->
+            <section class="wheel-section">
+                <div class="wheel-container">
+                    <!-- Arrow Pointer -->
+                    <div class="arrow-pointer">
+                        <i class="fas fa-caret-down"></i>
+                    </div>
+                    
+                    <!-- Spinning Wheel -->
+                    <div class="wheel" id="wheel">
+                        <canvas id="wheel-canvas" width="400" height="400"></canvas>
+                    </div>
+                    
+                    <!-- Center Hub -->
+                    <div class="wheel-center">
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+
+                <!-- Spin Button -->
+                <button class="spin-button" id="spin-button">
+                    <i class="fas fa-play"></i>
+                    <span>SPIN THE WHEEL</span>
+                </button>
+
+                <!-- Employee Input -->
+                <div class="employee-input">
+                    <label for="employee-name">Employee Name:</label>
+                    <input type="text" id="employee-name" placeholder="Enter employee name..." maxlength="30">
+                </div>
+            </section>
+
+            <!-- Right Panel - Winner Display -->
+            <aside class="winner-panel">
+                <h3 class="panel-title">
+                    <i class="fas fa-trophy"></i>
+                    Winner Announcement
+                </h3>
+                
+                <!-- Current Winner Display -->
+                <div class="current-winner" id="current-winner">
+                    <div class="winner-placeholder">
+                        <i class="fas fa-question-circle"></i>
+                        <p>Spin the wheel to reveal the winner!</p>
+                    </div>
+                </div>
+
+                <!-- Winner History -->
+                <div class="winner-history">
+                    <h4>Previous Winners</h4>
+                    <div class="history-list" id="history-list">
+                        <p class="no-winners">No winners yet...</p>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Confetti Container -->
+        <div class="confetti-container" id="confetti-container"></div>
+
+        <!-- Audio Elements -->
+        <audio id="spin-sound" preload="auto">
+            <source src="sounds/spin.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="win-sound" preload="auto">
+            <source src="sounds/win.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/sounds.js"></script>
+    <script src="js/wheel.js"></script>
+    <script src="js/prizes.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+
