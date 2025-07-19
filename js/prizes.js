@@ -4,7 +4,7 @@ class PrizeManager {
         this.prizes = [
             { amount: 1000, count: 1, remaining: 1, type: 'gold', icon: 'fas fa-crown' },
             { amount: 500, count: 10, remaining: 10, type: 'silver', icon: 'fas fa-star' },
-            { amount: 300, count: 12, remaining: 12, type: 'bronze', icon: 'fas fa-medal' }
+            { amount: 300, count: 11, remaining: 11, type: 'bronze', icon: 'fas fa-medal' }
         ];
         
         this.winners = [];
