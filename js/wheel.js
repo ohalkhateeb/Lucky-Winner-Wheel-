@@ -4,7 +4,7 @@ class SpinningWheel {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
         this.radius = 200;
-        this.segments = 23;
+        this.segments = 22;
         this.segmentAngle = (2 * Math.PI) / this.segments;
         this.currentRotation = 0;
         this.isSpinning = false;
