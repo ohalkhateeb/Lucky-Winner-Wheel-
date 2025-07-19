@@ -189,7 +189,7 @@ class LuckyWinnerApp {
         const totalWinners = this.prizeManager.getTotalWinners();
         
         this.elements.progressFill.style.width = `${progress}%`;
-        this.elements.progressText.textContent = `${totalWinners} / 23 winners`;
+        this.elements.progressText.textContent = `${totalWinners} / 22 winners`;
         
         // Update prize item styles based on remaining count
         this.updatePrizeItemStyles(remaining);
