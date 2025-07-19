@@ -4,41 +4,44 @@ class PrizeManager {
         this.prizes = [
             { amount: 1000, count: 1, remaining: 1, type: 'gold', icon: 'fas fa-crown' },
             { amount: 500, count: 10, remaining: 10, type: 'silver', icon: 'fas fa-star' },
-            { amount: 300, count: 11, remaining: 11, type: 'bronze', icon: 'fas fa-medal' }
+            { amount: 300, count: 12, remaining: 12, type: 'bronze', icon: 'fas fa-medal' }
         ];
         
         this.winners = [];
         this.usedEmployees = new Set();
-        this.prizePool = this.generatePrizePool();
-        this.shufflePrizePool();
+        this.segmentPrizes = this.generateSegmentPrizes();
+        this.availableSegments = new Set(Array.from({length: 23}, (_, i) => i));
     }
 
-    // Generate the complete prize pool
-    generatePrizePool() {
-        const pool = [];
+    // Generate prize assignments for each segment
+    generateSegmentPrizes() {
+        const segments = [];
         
         // Add 1x 1000 AED prize
-        pool.push({ amount: 1000, type: 'gold', icon: 'fas fa-crown' });
+        segments.push({ amount: 1000, type: 'gold', icon: 'fas fa-crown' });
         
         // Add 10x 500 AED prizes
         for (let i = 0; i < 10; i++) {
-            pool.push({ amount: 500, type: 'silver', icon: 'fas fa-star' });
+            segments.push({ amount: 500, type: 'silver', icon: 'fas fa-star' });
         }
         
         // Add 12x 300 AED prizes
         for (let i = 0; i < 12; i++) {
-            pool.push({ amount: 300, type: 'bronze', icon: 'fas fa-medal' });
+            segments.push({ amount: 300, type: 'bronze', icon: 'fas fa-medal' });
         }
         
-        return pool;
+        // Shuffle the segments using Fisher-Yates algorithm
+        for (let i = segments.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [segments[i], segments[j]] = [segments[j], segments[i]];
+        }
+        
+        return segments;
     }
 
-    // Shuffle the prize pool using Fisher-Yates algorithm
-    shufflePrizePool() {
-        for (let i = this.prizePool.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [this.prizePool[i], this.prizePool[j]] = [this.prizePool[j], this.prizePool[i]];
-        }
+    // Get the prize assignments for all segments
+    getSegmentPrizes() {
+        return this.segmentPrizes;
     }
 
     // Check if employee has already won
@@ -46,18 +49,18 @@ class PrizeManager {
         return this.usedEmployees.has(employeeName.toLowerCase().trim());
     }
 
-    // Get the next prize for a winner
-    getNextPrize(employeeName) {
+    // Get prize for a specific segment
+    getPrizeForSegment(segmentIndex, employeeName) {
         if (this.hasEmployeeWon(employeeName)) {
             throw new Error('Employee has already won a prize!');
         }
 
-        if (this.prizePool.length === 0) {
-            throw new Error('All prizes have been distributed!');
+        if (!this.availableSegments.has(segmentIndex)) {
+            throw new Error('This segment has already been won!');
         }
 
-        // Get the next prize from the shuffled pool
-        const prize = this.prizePool.shift();
+        // Get the prize for this segment
+        const prize = this.segmentPrizes[segmentIndex];
         
         // Update remaining counts
         const prizeType = this.prizes.find(p => p.amount === prize.amount);
@@ -69,12 +72,14 @@ class PrizeManager {
         const winner = {
             name: employeeName.trim(),
             prize: prize,
+            segment: segmentIndex + 1,
             timestamp: new Date(),
             order: this.winners.length + 1
         };
 
         this.winners.push(winner);
         this.usedEmployees.add(employeeName.toLowerCase().trim());
+        this.availableSegments.delete(segmentIndex);
 
         return winner;
     }
@@ -100,7 +105,7 @@ class PrizeManager {
 
     // Check if all prizes are distributed
     isComplete() {
-        return this.prizePool.length === 0;
+        return this.availableSegments.size === 0;
     }
 
     // Reset the prize system
@@ -110,8 +115,8 @@ class PrizeManager {
         });
         this.winners = [];
         this.usedEmployees.clear();
-        this.prizePool = this.generatePrizePool();
-        this.shufflePrizePool();
+        this.segmentPrizes = this.generateSegmentPrizes();
+        this.availableSegments = new Set(Array.from({length: 23}, (_, i) => i));
     }
 
     // Get progress percentage

@@ -1,13 +1,14 @@
 // Spinning Wheel System
 class SpinningWheel {
-    constructor(canvasId) {
+    constructor(canvasId, prizeManager) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
         this.radius = 200;
-        this.segments = 22;
+        this.segments = 23;
         this.segmentAngle = (2 * Math.PI) / this.segments;
         this.currentRotation = 0;
         this.isSpinning = false;
+        this.prizeManager = prizeManager;
         
         // Colors for segments (alternating pattern)
         this.segmentColors = [
@@ -19,6 +20,13 @@ class SpinningWheel {
             '#FCE7F3'  // Light pink
         ];
         
+        // Prize colors for different amounts
+        this.prizeColors = {
+            1000: '#FFD700', // Gold
+            500: '#C0C0C0',  // Silver
+            300: '#CD7F32'   // Bronze
+        };
+        
         this.init();
     }
 
@@ -26,7 +34,7 @@ class SpinningWheel {
         this.drawWheel();
     }
 
-    // Draw the wheel with 23 segments
+    // Draw the wheel with 23 segments showing prizes
     drawWheel() {
         const centerX = this.canvas.width / 2;
         const centerY = this.canvas.height / 2;
@@ -34,14 +42,26 @@ class SpinningWheel {
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
+        // Get the prize assignments for each segment
+        const segmentPrizes = this.prizeManager.getSegmentPrizes();
+        
         // Draw segments
         for (let i = 0; i < this.segments; i++) {
             const startAngle = i * this.segmentAngle;
             const endAngle = (i + 1) * this.segmentAngle;
             
-            // Select color
-            const colorIndex = i % this.segmentColors.length;
-            const segmentColor = this.segmentColors[colorIndex];
+            // Get prize for this segment
+            const prize = segmentPrizes[i];
+            
+            // Select color based on prize amount
+            let segmentColor;
+            if (prize.amount === 1000) {
+                segmentColor = '#FEF3C7'; // Light gold
+            } else if (prize.amount === 500) {
+                segmentColor = '#E5E7EB'; // Light silver
+            } else {
+                segmentColor = '#FED7AA'; // Light bronze
+            }
             
             // Draw segment
             this.ctx.beginPath();
@@ -58,8 +78,8 @@ class SpinningWheel {
             this.ctx.lineWidth = 2;
             this.ctx.stroke();
             
-            // Draw segment number
-            this.drawSegmentNumber(centerX, centerY, i + 1, startAngle + this.segmentAngle / 2);
+            // Draw prize text
+            this.drawPrizeText(centerX, centerY, prize, startAngle + this.segmentAngle / 2);
         }
         
         // Draw outer border
@@ -70,8 +90,8 @@ class SpinningWheel {
         this.ctx.stroke();
     }
 
-    // Draw segment numbers
-    drawSegmentNumber(centerX, centerY, number, angle) {
+    // Draw prize text on segments
+    drawPrizeText(centerX, centerY, prize, angle) {
         const textRadius = this.radius * 0.75;
         const x = centerX + Math.cos(angle) * textRadius;
         const y = centerY + Math.sin(angle) * textRadius;
@@ -80,11 +100,23 @@ class SpinningWheel {
         this.ctx.translate(x, y);
         this.ctx.rotate(angle + Math.PI / 2);
         
-        this.ctx.fillStyle = '#1F2937';
-        this.ctx.font = 'bold 16px Poppins';
+        // Set text color based on prize amount
+        if (prize.amount === 1000) {
+            this.ctx.fillStyle = '#B45309'; // Dark gold
+        } else if (prize.amount === 500) {
+            this.ctx.fillStyle = '#374151'; // Dark gray
+        } else {
+            this.ctx.fillStyle = '#92400E'; // Dark bronze
+        }
+        
+        this.ctx.font = 'bold 14px Poppins';
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
-        this.ctx.fillText(number.toString(), 0, 0);
+        
+        // Draw prize amount
+        this.ctx.fillText(`${prize.amount}`, 0, -5);
+        this.ctx.font = 'bold 12px Poppins';
+        this.ctx.fillText('AED', 0, 8);
         
         this.ctx.restore();
     }

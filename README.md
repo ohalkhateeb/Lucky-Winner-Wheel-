@@ -99,9 +99,13 @@ lucky-winner-wheel/
 
 ## Customization
 
-### Changing Prize Amounts
-Edit the `prizes` array in `js/prizes.js`:
+### Changing Prize Amounts and Distribution
+To change the prize amounts, their counts, or add new prize tiers, modify the `this.prizes` array and the `generateSegmentPrizes()` method in `js/prizes.js`.
+
+**1. `this.prizes` array:**
+This array defines the prize tiers, their initial counts, and visual properties. You can adjust the `amount`, `count`, `type`, and `icon` for each prize.
 ```javascript
+// js/prizes.js
 this.prizes = [
     { amount: 1000, count: 1, remaining: 1, type: 'gold', icon: 'fas fa-crown' },
     { amount: 500, count: 10, remaining: 10, type: 'silver', icon: 'fas fa-star' },
@@ -109,20 +113,81 @@ this.prizes = [
 ];
 ```
 
-### Changing Number of Employees
-Update the `segments` property in `js/wheel.js`:
+**2. `generateSegmentPrizes()` method:**
+This method populates the wheel segments with prizes based on the counts defined in `this.prizes`. If you change the `count` in `this.prizes`, you must also adjust the loops in this method accordingly to ensure the correct number of each prize is added to the wheel.
 ```javascript
-this.segments = 23; // Change to your desired number
+// js/prizes.js
+generateSegmentPrizes() {
+    const segments = [];
+    
+    // Example: Add 1x 1000 AED prize
+    segments.push({ amount: 1000, type: 'gold', icon: 'fas fa-crown' });
+    
+    // Example: Add 10x 500 AED prizes
+    for (let i = 0; i < 10; i++) {
+        segments.push({ amount: 500, type: 'silver', icon: 'fas fa-star' });
+    }
+    
+    // Example: Add 12x 300 AED prizes
+    for (let i = 0; i < 12; i++) {
+        segments.push({ amount: 300, type: 'bronze', icon: 'fas fa-medal' });
+    }
+    
+    // Ensure the total number of prizes pushed here matches the total number of segments (employees)
+    // The wheel currently has 23 segments, so ensure 23 prizes are pushed.
+    
+    // Shuffle the segments (important for random distribution)
+    for (let i = segments.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [segments[i], segments[j]] = [segments[j], segments[i]];
+    }
+    
+    return segments;
+}
 ```
+
+### Changing Number of Employees (Segments on Wheel)
+To change the total number of employees (which corresponds to the number of segments on the wheel), you need to modify two places:
+
+**1. `this.segments` property in `js/wheel.js`:**
+This defines how many equal segments the wheel will be divided into.
+```javascript
+// js/wheel.js
+this.segments = 23; // Change this number to your desired total number of employees/segments
+```
+
+**2. `PrizeManager` constructor and `getProgress()` method in `js/prizes.js`:**
+- In the `PrizeManager` constructor, update the `availableSegments` initialization to match the new total number of segments.
+- In the `getProgress()` method, update the total number of winners used for percentage calculation.
+```javascript
+// js/prizes.js
+constructor() {
+    // ... other properties
+    this.availableSegments = new Set(Array.from({length: 23}, (_, i) => i)); // Update '23' to your new total
+}
+
+// ...
+
+getProgress() {
+    return Math.round((this.getTotalWinners() / 23) * 100); // Update '23' to your new total
+}
+```
+
+**Important Note**: When changing the number of employees/segments, ensure that the total number of prizes defined in `js/prizes.js` (`generateSegmentPrizes()` method) exactly matches the new `this.segments` value in `js/wheel.js`.
 
 ### Customizing Colors
 Modify the color scheme in `css/styles.css`:
 ```css
-:root {
-    --primary-gold: #FFD700;
-    --primary-blue: #1E3A8A;
-    --background-dark: #0F172A;
+/* Example of colors you can change */
+body {
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%);
 }
+
+.title {
+    color: #FFD700;
+}
+
+/* And other color properties throughout styles.css */
 ```
 
 ## Browser Compatibility

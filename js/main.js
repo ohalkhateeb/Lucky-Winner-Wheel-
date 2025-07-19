@@ -2,7 +2,7 @@
 class LuckyWinnerApp {
     constructor() {
         this.prizeManager = new PrizeManager();
-        this.wheel = new SpinningWheel('wheel-canvas');
+        this.wheel = new SpinningWheel('wheel-canvas', this.prizeManager);
         this.animationManager = new AnimationManager();
         this.soundGenerator = new SoundGenerator();
         
@@ -101,8 +101,9 @@ class LuckyWinnerApp {
 
     handleWinnerSelection(segment) {
         try {
-            // Get the prize for this winner
-            const winner = this.prizeManager.getNextPrize(this.currentEmployee);
+            // Get the prize for this segment (segment is 1-based, convert to 0-based index)
+            const segmentIndex = segment - 1;
+            const winner = this.prizeManager.getPrizeForSegment(segmentIndex, this.currentEmployee);
             
             // Play win sound
             this.playSound('win');
@@ -189,7 +190,7 @@ class LuckyWinnerApp {
         const totalWinners = this.prizeManager.getTotalWinners();
         
         this.elements.progressFill.style.width = `${progress}%`;
-        this.elements.progressText.textContent = `${totalWinners} / 22 winners`;
+        this.elements.progressText.textContent = `${totalWinners} / 23 winners`;
         
         // Update prize item styles based on remaining count
         this.updatePrizeItemStyles(remaining);
